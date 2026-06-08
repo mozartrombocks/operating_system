@@ -83,4 +83,4 @@ Contributions welcome! Please:
 
 ## Author
 
-Mohammed Rahman
+Mohammed (Mo) Rahman; shadman9702@gmail.com
