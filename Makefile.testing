@@ -1,0 +1,241 @@
+################################################################################
+# @file Makefile.testing
+# @brief Test targets for OS kernel build system
+#
+# Add these targets to your main Makefile to enable testing and CI/CD support.
+#
+# Usage:
+#   make test                    # Run all tests
+#   make test-unit              # Run unit tests only
+#   make test-integration       # Run integration tests only
+#   make test-verbose           # Run tests with verbose output
+#   make test-clean             # Clean test artifacts
+#   make ci                     # Run full CI pipeline
+#
+# Example: Add to main Makefile:
+#   include Makefile.testing
+################################################################################
+
+.PHONY: test test-unit test-integration test-verbose test-clean ci help-test
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+## Test framework
+TEST_FRAMEWORK = test_framework.c test_framework.h
+
+## Test directory
+TEST_DIR = tests
+
+## Integration test script
+INTEGRATION_TEST_SCRIPT = scripts/integration_test.sh
+
+## Verbose mode (set to 1 for verbose output)
+VERBOSE ?= 0
+
+## QEMU timeout in seconds
+QEMU_TIMEOUT ?= 10
+
+# ============================================================================
+# DEFAULT TARGET
+# ============================================================================
+
+##
+## @brief Run all tests (unit + integration)
+##
+## This is the primary test target that runs the complete test suite.
+## Exit code: 0 if all tests pass, non-zero if any test fails.
+##
+## Dependencies:
+##   - Unit test sources in tests/
+##   - Integration test script
+##
+test: test-unit test-integration
+	@echo ""
+	@echo "================================================================================"
+	@echo "All tests completed successfully!"
+	@echo "================================================================================"
+	@echo ""
+
+# ============================================================================
+# UNIT TESTS
+# ============================================================================
+
+##
+## @brief Build and run unit tests
+##
+## Compiles unit tests and executes them. Unit tests verify individual
+## components (memory allocator, interrupt handlers, etc).
+##
+## Exit code:
+##   0 - All unit tests passed
+##   1 - One or more unit tests failed
+##   2 - Build failed
+##
+test-unit:
+	@echo "================================================================================"
+	@echo "Running Unit Tests"
+	@echo "================================================================================"
+	@if [ ! -d "$(TEST_DIR)" ]; then \
+		echo "Test directory not found: $(TEST_DIR)"; \
+		exit 2; \
+	fi
+	@cd "$(TEST_DIR)" && \
+		gcc -o test_print \
+			../$(TEST_FRAMEWORK) \
+			test_print.c \
+			-I.. \
+			-Wall -Wextra -Werror && \
+		./test_print
+	@if [ $$? -eq 0 ]; then \
+		echo ""; \
+		echo "Unit tests PASSED"; \
+		echo ""; \
+	else \
+		echo ""; \
+		echo "Unit tests FAILED"; \
+		exit 1; \
+	fi
+
+# ============================================================================
+# INTEGRATION TESTS
+# ============================================================================
+
+##
+## @brief Run integration tests with QEMU
+##
+## Builds the kernel and boots it in QEMU emulation. Verifies that:
+##   - Kernel boots without crashing
+##   - Expected boot messages appear
+##   - No fatal errors occur
+##
+## Requirements:
+##   - QEMU installed (qemu-system-x86_64)
+##   - Kernel must be built first
+##
+## Exit code:
+##   0 - All integration tests passed
+##   2 - Integration tests failed
+##
+test-integration: build-x86_64
+	@echo "================================================================================"
+	@echo "Running Integration Tests (QEMU)"
+	@echo "================================================================================"
+	@if [ ! -f "$(INTEGRATION_TEST_SCRIPT)" ]; then \
+		echo "Integration test script not found: $(INTEGRATION_TEST_SCRIPT)"; \
+		exit 2; \
+	fi
+	@chmod +x "$(INTEGRATION_TEST_SCRIPT)"
+	@if [ "$(VERBOSE)" = "1" ]; then \
+		"$(INTEGRATION_TEST_SCRIPT)" --verbose --timeout $(QEMU_TIMEOUT); \
+	else \
+		"$(INTEGRATION_TEST_SCRIPT)" --timeout $(QEMU_TIMEOUT); \
+	fi
+	@if [ $$? -eq 0 ]; then \
+		echo ""; \
+		echo "Integration tests PASSED"; \
+		echo ""; \
+	else \
+		echo ""; \
+		echo "Integration tests FAILED"; \
+		exit 2; \
+	fi
+
+# ============================================================================
+# VERBOSE TESTING
+# ============================================================================
+
+##
+## @brief Run all tests with verbose output
+##
+## Same as 'test' but with detailed output from all test suites.
+## Useful for debugging test failures.
+##
+test-verbose:
+	@$(MAKE) test-unit VERBOSE=1
+	@$(MAKE) test-integration VERBOSE=1
+
+# ============================================================================
+# CI/CD PIPELINE
+# ============================================================================
+
+##
+## @brief Run complete CI pipeline locally
+##
+## Mimics GitHub Actions pipeline:
+##   1. Build kernel
+##   2. Run unit tests
+##   3. Run integration tests
+##
+## Useful for testing locally before pushing to GitHub.
+##
+ci: clean build-x86_64 test
+	@echo "================================================================================"
+	@echo "CI Pipeline Completed Successfully!"
+	@echo "================================================================================"
+
+# ============================================================================
+# CLEANUP
+# ============================================================================
+
+##
+## @brief Clean test artifacts
+##
+## Removes compiled test executables and logs.
+##
+test-clean:
+	@echo "Cleaning test artifacts..."
+	@if [ -d "$(TEST_DIR)" ]; then \
+		cd "$(TEST_DIR)" && \
+			rm -f test_print test_memory test_interrupt && \
+			rm -f *.o *.log; \
+	fi
+	@rm -f /tmp/qemu_output.txt /tmp/kernel_build.log
+	@echo "Test cleanup complete"
+
+# ============================================================================
+# HELP
+# ============================================================================
+
+##
+## @brief Display test-related make targets
+##
+help-test:
+	@echo ""
+	@echo "Testing Targets:"
+	@echo "  make test                 - Run all tests (unit + integration)"
+	@echo "  make test-unit            - Run unit tests only"
+	@echo "  make test-integration     - Run integration tests only"
+	@echo "  make test-verbose         - Run all tests with verbose output"
+	@echo "  make ci                   - Run full CI pipeline (clean + build + test)"
+	@echo "  make test-clean           - Clean test artifacts"
+	@echo ""
+	@echo "Options:"
+	@echo "  VERBOSE=1                 - Enable verbose output"
+	@echo "  QEMU_TIMEOUT=N            - Set QEMU timeout to N seconds (default: 10)"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make test                                    # Run all tests"
+	@echo "  make test-integration QEMU_TIMEOUT=30      # Run with 30s timeout"
+	@echo "  make ci VERBOSE=1                           # Full pipeline with verbose output"
+	@echo ""
+
+# ============================================================================
+# PHONY TARGETS (Don't create files with these names)
+# ============================================================================
+
+.PHONY: test test-unit test-integration test-verbose test-clean ci help-test
+
+# ============================================================================
+# DEPENDENCIES
+# ============================================================================
+
+# These targets depend on kernel being built
+test-integration: build-x86_64
+
+# This target cleans test artifacts
+test-clean: ;
+
+# CI pipeline is a meta-target that runs other targets
+ci: build-x86_64 test

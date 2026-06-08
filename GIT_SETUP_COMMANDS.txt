@@ -1,0 +1,205 @@
+================================================================================
+GIT SETUP COMMANDS - COPY & PASTE THESE
+================================================================================
+
+Run these commands in your Windows Command Prompt or PowerShell:
+
+================================================================================
+1. Navigate to Your Project
+================================================================================
+
+cd C:\Users\shadm\Documents\myworks2\operating_system
+
+
+================================================================================
+2. Configure Git (One-time setup)
+================================================================================
+
+git config --global user.name "Mo"
+git config --global user.email "shadman9702@gmail.com"
+
+
+================================================================================
+3. Check if .git exists and remove it
+================================================================================
+
+If you get an error in the next step, run this first:
+
+rmdir /s /q .git
+
+(This removes the broken .git directory)
+
+
+================================================================================
+4. Initialize Git Repository
+================================================================================
+
+git init
+
+
+================================================================================
+5. Verify Initialization
+================================================================================
+
+git status
+
+You should see:
+  On branch master (or main)
+
+  No commits yet
+
+  Untracked files:
+    (use "git add <file>..." to include in what will be committed)
+
+
+================================================================================
+6. Add All Files
+================================================================================
+
+git add .
+
+
+================================================================================
+7. Check What Will Be Committed
+================================================================================
+
+git status
+
+You should see green "new file:" entries
+
+
+================================================================================
+8. Create Initial Commit
+================================================================================
+
+git commit -m "Initial commit: Professional 64-bit OS kernel with full documentation"
+
+
+================================================================================
+9. Verify Commit Created
+================================================================================
+
+git log
+
+You should see your commit
+
+
+================================================================================
+10. Create Repository on GitHub
+================================================================================
+
+1. Go to: https://github.com/new
+2. Repository name: Writing-an-operating-system-kernel-from-scratch
+3. Description: A bare-metal 64-bit OS kernel with comprehensive documentation
+4. Visibility: Public
+5. UNCHECK "Add a README file"
+6. UNCHECK "Add .gitignore"
+7. Click "Create repository"
+
+
+================================================================================
+11. Add GitHub Remote
+================================================================================
+
+Replace YOUR_USERNAME with your actual GitHub username
+
+git remote add origin https://github.com/YOUR_USERNAME/Writing-an-operating-system-kernel-from-scratch.git
+
+Example (if your GitHub username is "mozartrombocks"):
+
+git remote add origin https://github.com/mozartrombocks/Writing-an-operating-system-kernel-from-scratch.git
+
+
+================================================================================
+12. Rename Branch to Main
+================================================================================
+
+git branch -M main
+
+
+================================================================================
+13. Push to GitHub
+================================================================================
+
+git push -u origin main
+
+When asked for password:
+- Use your GitHub password, OR
+- Use a Personal Access Token (create at https://github.com/settings/tokens)
+
+
+================================================================================
+14. Verify on GitHub
+================================================================================
+
+Visit: https://github.com/YOUR_USERNAME/Writing-an-operating-system-kernel-from-scratch
+
+You should see all your files!
+
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Q: "fatal: not a git repository"
+A: Make sure you're in the correct directory:
+   cd C:\Users\shadm\Documents\myworks2\operating_system
+
+   Then try git init again
+
+Q: ".git is already installed"
+A: Remove the old one first:
+   rmdir /s /q .git
+
+   Then run git init
+
+Q: "fatal: bad config line"
+A: Remove .git and start over:
+   rmdir /s /q .git
+   git init
+   git config user.name "Mo"
+   git config user.email "shadman9702@gmail.com"
+
+Q: "Permission denied"
+A: Try running as Administrator
+   Right-click Command Prompt → Run as Administrator
+
+Q: Command not recognized
+A: Make sure git is installed:
+   git --version
+
+   If not, download from: https://git-scm.com/download/win
+
+
+================================================================================
+COPY & PASTE THESE COMMANDS IN ORDER
+================================================================================
+
+cd C:\Users\shadm\Documents\myworks2\operating_system
+git config --global user.name "Mo"
+git config --global user.email "shadman9702@gmail.com"
+git init
+git status
+git add .
+git status
+git commit -m "Initial commit: Professional 64-bit OS kernel with full documentation"
+git log
+git remote add origin https://github.com/YOUR_USERNAME/Writing-an-operating-system-kernel-from-scratch.git
+git branch -M main
+git push -u origin main
+
+
+================================================================================
+AFTER YOU RUN THESE COMMANDS
+================================================================================
+
+1. Create the GitHub repository at: https://github.com/new
+   (See step 10 above for details)
+
+2. Make sure to use YOUR actual GitHub username in the remote URL
+
+3. When git asks for password, use your GitHub password or Personal Access Token
+
+4. Check your repo on GitHub: https://github.com/YOUR_USERNAME/YOUR_REPO_NAME
+
+Good luck! Let me know if you hit any issues.
